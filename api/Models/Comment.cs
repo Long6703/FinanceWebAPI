@@ -9,15 +9,13 @@ namespace api.Models
     {
         public int Id { get; set; }
 
-        public string Title { get; set; } = null!;
+        public string Title { get; set; } = string.Empty;
 
-        public string Content { get; set; } = null!;
+        public string Content { get; set; } = string.Empty;
 
-        public DateTime CreatedOn { get; set; }
+        public DateTime CreatedOn { get; set; } = DateTime.Now;
 
         public int? StockId { get; set; }
-
-        public int? StocksId { get; set; }
 
         public virtual Stock? Stocks { get; set; }
     }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using api.CommentMapper;
 using api.Models;
 
 namespace api.Mapper
@@ -18,7 +19,8 @@ namespace api.Mapper
                 Purchase = stock.Purchase,
                 LastDiv = stock.LastDiv,
                 Isdustry = stock.Isdustry,
-                MarketCap = stock.MarketCap
+                MarketCap = stock.MarketCap,
+                Comments = stock.Comments.Select(c => c.ToCommentDTO()).ToList()
             };
         }
 

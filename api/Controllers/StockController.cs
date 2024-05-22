@@ -16,12 +16,10 @@ namespace api.Controllers
     public class StockController : ControllerBase
     {
         private readonly IStockRepository _stockRepository;
-        private readonly ApplicationDbContext _context;
 
-        public StockController(IStockRepository stockRepository, ApplicationDbContext context)
+        public StockController(IStockRepository stockRepository)
         {
             _stockRepository = stockRepository;
-            _context = context;
         }
 
         [HttpGet]
@@ -35,42 +33,30 @@ namespace api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById([FromRoute] int id)
         {
-            var stock = await _context.Stocks.FindAsync(id);
-
+            var stock = await _stockRepository.GetByIdAsync(id);
             if (stock == null)
             {
                 return NotFound();
             }
-
             return Ok(stock.ToStockDTO());
         }
 
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateStockDTO createStockDTO){
             var stock = createStockDTO.ToStockFromCreateStockDTO();
-            await _context.Stocks.AddAsync(stock);
-            await _context.SaveChangesAsync();
+            await _stockRepository.CreateAsync(stock);
             return CreatedAtAction(nameof(GetById), new { id = stock.Id }, stock.ToStockDTO());
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateStockRequestDTO updateStockRequestDTO)
         {
-            var stock =await _context.Stocks.FindAsync(id);
+            var stock =await _stockRepository.UpdateAsync(id, updateStockRequestDTO);
 
             if (stock == null)
             {
                 return NotFound();
             }
-
-            stock.Sysbol = updateStockRequestDTO.Sysbol;
-            stock.CompanyName = updateStockRequestDTO.CompanyName;
-            stock.Purchase = updateStockRequestDTO.Purchase;
-            stock.LastDiv = updateStockRequestDTO.LastDiv;
-            stock.Isdustry = updateStockRequestDTO.Isdustry;
-            stock.MarketCap = updateStockRequestDTO.MarketCap;
-
-            await _context.SaveChangesAsync();
 
             return Ok(stock.ToStockDTO());
         }
@@ -78,15 +64,12 @@ namespace api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            var stock = await _context.Stocks.FindAsync(id);
+            var stock = await _stockRepository.DeleteAsync(id);
 
             if (stock == null)
             {
                 return NotFound();
             }
-
-            _context.Stocks.Remove(stock);
-            await _context.SaveChangesAsync();
 
             return NoContent();
         }
