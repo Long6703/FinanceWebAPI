@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using api.Data;
 using api.Dtos.Stock;
+using api.Helpers;
 using api.Interface;
 using api.Models;
 using Microsoft.EntityFrameworkCore;
@@ -40,9 +41,31 @@ namespace api.Repository
 
         }
 
-        public async Task<List<Stock>> GetAllAsync()
+        public async Task<List<Stock>> GetAllAsync(QueryObject queryObject)
         {
-            return await _context.Stocks.Include(s => s.Comments).ToListAsync();
+            var stock = _context.Stocks.Include(s => s.Comments).AsQueryable();
+
+            if(!string.IsNullOrWhiteSpace(queryObject.Sysbol))
+            {
+                stock = stock.Where(s => s.Sysbol.Contains(queryObject.Sysbol));
+            }
+
+            if(!string.IsNullOrWhiteSpace(queryObject.CompanyName))
+            {
+                stock = stock.Where(s => s.CompanyName.Contains(queryObject.CompanyName));
+            }
+
+            if(!string.IsNullOrWhiteSpace(queryObject.SortBy))
+            {
+                if(queryObject.SortBy.Equals("Sysbol", StringComparison.OrdinalIgnoreCase)){
+                    stock = queryObject.IsDecsending ? stock.OrderByDescending(s => s.Id) : stock.OrderBy(s => s.Id);
+                }
+
+            }
+
+            var skipRecods = (queryObject.PageNumber - 1) * queryObject.PageSize;
+
+            return await stock.Skip(skipRecods).Take(queryObject.PageSize).ToListAsync();
         }
 
         public async Task<Stock?> GetByIdAsync(int id)
