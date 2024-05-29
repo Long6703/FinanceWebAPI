@@ -8,6 +8,7 @@ namespace api.Models
 {
     public class AppUser : IdentityUser
     {
-        
+        public int Age { get; set; }
+        public List<Portfolio> Portfolios { get; set; } = new List<Portfolio>();
     }
 }
